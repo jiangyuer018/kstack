@@ -27,6 +27,8 @@ import (
 
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
+
+	"github.com/kstackhq/kstack/sidecar/internal/lib/version"
 )
 
 // What the wires share: the idle guard every stream runs under, the ids a
@@ -137,6 +139,8 @@ func (b beatingBody) Read(p []byte) (int, error) {
 	return n, err
 }
 
+var clientUserAgent = "kstack/" + version.Version
+
 // openAIOptions is a client over the OpenAI SDK built from the provider alone.
 // NewClient is never called: it is the one caller of DefaultClientOptions, the
 // SDK's one reader of the vendor's variables, so each wire builds its service from
@@ -148,6 +152,7 @@ func openAIOptions(p Provider, wire ...option.RequestOption) []option.RequestOpt
 	opts := []option.RequestOption{
 		option.WithBaseURL(p.BaseURL),
 		option.WithMaxRetries(0),
+		option.WithHeader("User-Agent", clientUserAgent),
 		option.WithHTTPClient(NoRedirectClient),
 		option.WithMiddleware(func(r *http.Request, next option.MiddlewareNext) (*http.Response, error) {
 			return send(p, r, next)
