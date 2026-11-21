@@ -139,8 +139,6 @@ func (b beatingBody) Read(p []byte) (int, error) {
 	return n, err
 }
 
-var clientUserAgent = "kstack/" + version.Version
-
 // openAIOptions is a client over the OpenAI SDK built from the provider alone.
 // NewClient is never called: it is the one caller of DefaultClientOptions, the
 // SDK's one reader of the vendor's variables, so each wire builds its service from
@@ -152,7 +150,6 @@ func openAIOptions(p Provider, wire ...option.RequestOption) []option.RequestOpt
 	opts := []option.RequestOption{
 		option.WithBaseURL(p.BaseURL),
 		option.WithMaxRetries(0),
-		option.WithHeader("User-Agent", clientUserAgent),
 		option.WithHTTPClient(NoRedirectClient),
 		option.WithMiddleware(func(r *http.Request, next option.MiddlewareNext) (*http.Response, error) {
 			return send(p, r, next)
@@ -180,10 +177,15 @@ func authorize(p Provider, r *http.Request) error {
 	return nil
 }
 
-// send is every wire's middleware: authorize, send, and tell a signer of a
-// 401. A redirect fails here, since NoRedirectClient follows none and the SDKs
-// read a 3xx as an answer.
+// userAgent names Kstack to every vendor, in place of the SDK's or Go's own
+// name: some vendors watch for anonymous clients.
+var userAgent = "kstack/" + version.Version
+
+// send is every wire's middleware: name Kstack, authorize, send, and tell a
+// signer of a 401. A redirect fails here, since NoRedirectClient follows none
+// and the SDKs read a 3xx as an answer.
 func send(p Provider, r *http.Request, next func(*http.Request) (*http.Response, error)) (*http.Response, error) {
+	r.Header.Set("User-Agent", userAgent)
 	if err := authorize(p, r); err != nil {
 		// A cancel or an idle trip while the signer waited ends the request,
 		// not the credential.

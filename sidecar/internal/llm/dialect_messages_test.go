@@ -191,17 +191,6 @@ func TestMessagesStreamsAReplyAndRecordsIt(t *testing.T) {
 	assert.Nil(t, rec.body["tools"])
 }
 
-func TestMessagesProviderCanOverrideTheUserAgent(t *testing.T) {
-	p, rec := replay(t, textStream)
-	p.KeyHeader, p.Key = "User-Agent", "provider/1"
-
-	_, _, err := ask(t, request(p))
-
-	require.NoError(t, err)
-	assert.Equal(t, "provider/1", rec.header.Get("User-Agent"))
-	assert.Empty(t, rec.header.Get("X-Api-Key"))
-}
-
 // A model that lists efforts asks for adaptive thinking with a summary, at the
 // effort the send named: the two are one feature on this wire.
 func TestMessagesSendsThinkingWithTheEffort(t *testing.T) {

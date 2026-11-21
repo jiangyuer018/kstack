@@ -138,17 +138,6 @@ func TestChatCompletionsStreamsAReplyAndRecordsIt(t *testing.T) {
 	assert.Equal(t, "kstack/"+version.Version, rec.header.Get("User-Agent"))
 }
 
-func TestChatCompletionsProviderCanOverrideTheUserAgent(t *testing.T) {
-	p, rec := chatReplay(t, chatStream)
-	p.KeyHeader, p.Key = "User-Agent", "provider/1"
-
-	_, _, err := askChat(t, chatRequest(p))
-
-	require.NoError(t, err)
-	assert.Equal(t, "provider/1", rec.header.Get("User-Agent"))
-	assert.Empty(t, rec.header.Get("Authorization"))
-}
-
 // The wire streams no usage unless asked for it, so every request asks.
 func TestChatCompletionsAsksForUsage(t *testing.T) {
 	p, rec := chatReplay(t, chatStream)

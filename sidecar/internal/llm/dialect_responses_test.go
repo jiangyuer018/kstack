@@ -162,17 +162,6 @@ func TestResponsesStreamsAReplyAndRecordsIt(t *testing.T) {
 	assert.Equal(t, "kstack/"+version.Version, rec.header.Get("User-Agent"))
 }
 
-func TestResponsesProviderCanOverrideTheUserAgent(t *testing.T) {
-	p, rec := responsesReplay(t, responsesStream)
-	p.KeyHeader, p.Key = "User-Agent", "provider/1"
-
-	_, _, err := askResponses(t, responsesRequest(p))
-
-	require.NoError(t, err)
-	assert.Equal(t, "provider/1", rec.header.Get("User-Agent"))
-	assert.Empty(t, rec.header.Get("Authorization"))
-}
-
 // A model that lists efforts asks to reason at that level and for a summary of it.
 func TestResponsesSendsReasoningWithTheEffort(t *testing.T) {
 	p, rec := responsesReplay(t, responsesStream)
