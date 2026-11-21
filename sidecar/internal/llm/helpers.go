@@ -211,7 +211,8 @@ func send(p Provider, r *http.Request, next func(*http.Request) (*http.Response,
 }
 
 // SignedDo sends req as every wire sends a request of p: authorized, following
-// no redirect, a signer told of a 401.
+// no redirect, a signer told of a 401. Its User-Agent is always Kstack's,
+// whatever req carries.
 func SignedDo(p Provider, req *http.Request) (*http.Response, error) {
 	return send(p, req, NoRedirectClient.Do)
 }
